@@ -8,5 +8,6 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
-  base: "/karutag.github.io/",
+  // base: "/karutag.github.io/",
+  base: "/karutag/",
 })
