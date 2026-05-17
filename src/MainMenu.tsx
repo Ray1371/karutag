@@ -3,8 +3,8 @@
 // Primary UI + orchestration component
 // Handles uploads, search input, and displaying cards
 
-import {useContext} from 'react';
-import { optionsContext } from './App';
+// import {useContext} from 'react';
+// import { optionsContext } from './App';
 import Navbar from "./Navbar";
 
 import CollectionTable from "./CollectionTable";
