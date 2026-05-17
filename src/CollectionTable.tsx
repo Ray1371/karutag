@@ -1,8 +1,11 @@
-import { useState,useEffect } from "react";
+import { useState,useEffect,useContext } from "react";
 import type { Card } from "./Upload";
 import './index.css'
 import calcMaxEffort from "./maxEffort";
+import { IoIosSearch } from "react-icons/io";
+import { optionsContext
 
+ } from "./App";
 type CollectionTableProps = {
   cards: Card[];
   selected: Set<string>;
@@ -58,18 +61,40 @@ export default function CollectionTable({
   if (currentPage < 1) setCurrentPage(1);
 }, [maxPage, currentPage]);
 
+  // const context = useContext(optionsContext);
+  const {
+      condensedTable,
+      // setCondensedTable,
+      // hideWishlists,
+      // setHideWishlists,
+      hideToughness,
+      // setHideToughness,
+      hideDye,
+      // setHideDye,
+      hideFrame,
+      // setHideFrame,
+      hideEffort,
+      // setHideEffort,
+      hideQuality,
+      // setHideQuality
+  } = useContext(optionsContext);
 
   
   
   return (
   <div id='collection-table'>
-    <table className='card-table'>
+    <table className={
+      condensedTable ? "card-table condensed" : "card-table"
+    }
+    >
       <thead
         className="header-bar"
       >
         <tr
-        // className='align-text-left'
         >
+          <th className="col-search">
+            Google Image Search
+          </th>
           <th scope="col"
             className="col-check"
           >
@@ -87,8 +112,11 @@ export default function CollectionTable({
               {sortKey === 'wishlists' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
              WLs
-
             </th>
+{/* todo here: make the search button */}
+
+
+
           <th className="col-name">
           <button onClick={() => onToggleSort('character')}>
               {sortKey === 'character' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
@@ -110,31 +138,50 @@ export default function CollectionTable({
             )}
           </th>
 
-          <th className='col-quality'>Quality
-            <button onClick={() => onToggleSort('quality')}>
-              {sortKey === 'quality' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
-            </button>
-          </th>
 
-          <th className='col-effort'>Effort
-            <button onClick={() => onToggleSort('worker.effort')}>
-              {sortKey === 'effort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
-            </button>
-          </th>
-          <th className='col-toughness'>Toughness</th>
-          <th className='col-maxeffort'>Max Effort
-            <button onClick={() => onToggleSort('maxeffort')}>
-              {sortKey === 'maxeffort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
-            </button>
-          </th>
-          <th className='col-frame'>Frame
-            <button onClick={() => onToggleSort('frame')}>
-              {sortKey === 'frame' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
-            </button>
-          </th>
-          <th className='col-dye'>Dye
+          {/* {!hideEffort && (
+            <th className='col-effort'>Effort
+              <button onClick={() => onToggleSort('worker.effort')}>
+                {sortKey === 'effort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+              </button>
+            </th>
+          )} */}
+          {!hideQuality && (
+            <th className='col-quality'>Quality
+              <button onClick={() => onToggleSort('quality')}>
+                {sortKey === 'quality' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+              </button>
+            </th>
+          )}
+          {!hideToughness && (
+            <th className='col-toughness'>Tough</th>
+          )}
+          {!hideEffort && (
+            <th className='col-effort'>Effort
+              <button onClick={() => onToggleSort('worker.effort')}>
+                {sortKey === 'effort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+              </button>
+            </th>
+          )}
+          {!hideEffort && (
+            <th className='col-maxeffort'>Max Effort
+              <button onClick={() => onToggleSort('maxeffort')}>
+                {sortKey === 'maxeffort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+              </button>
+            </th>
+          )}
+          {!hideFrame && (
+            <th className='col-frame'>Frame
+              <button onClick={() => onToggleSort('frame')}>
+                {sortKey === 'frame' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+              </button>
+            </th>
+          )}
+          {!hideDye && (
+            <th className='col-dye'>Dye
             
-          </th>
+            </th>
+          )}
         </tr>
       </thead>
 
@@ -144,6 +191,15 @@ export default function CollectionTable({
             <tr key={card.code} 
             className={`align-text-left`}
             >
+              <td>
+                <button onClick={() => 
+                  {
+                    open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
+                  }
+                }>
+                  <IoIosSearch />
+                </button>
+              </td>
               <td>
                 <input
                   type="checkbox"
@@ -165,13 +221,25 @@ export default function CollectionTable({
               <td className='col-print'>{card.number}</td>
               <td className='col-tag'>{card.tag}</td>
 
-              <td className='col-quality'>{card.quality}</td>
-              <td className='col-effort'>{card.worker_effort}</td>
+              {!hideEffort && (
+                <td className='col-effort'>{card.worker_effort}</td>
+              )}
+              {!hideQuality && (
+                <td className='col-quality'>{card.quality}</td>
+              )}
               {/* todo: go back to upload.tsx and fix up worker fields if needed */}
-              <td className='col-toughness'>{card.worker_toughness}</td>
-              <td className='col-maxeffort'>{card.worker_effort ? calcMaxEffort(card) : ''}</td>
-              <td className='col-frame'>{card.frame}</td>
-              <td className='col-dye'>{card.dye_name}</td>
+              {!hideToughness && (
+                <td className='col-toughness'>{card.worker_toughness}</td>
+              )}
+              {!hideEffort && (
+                <td className='col-maxeffort'>{card.worker_effort ? calcMaxEffort(card) : ''}</td>
+              )}
+              {!hideFrame && (
+                <td className='col-frame'>{card.frame}</td>
+              )}
+              {!hideDye && (
+                <td className='col-dye'>{card.dye_name}</td>
+              )}
             </tr>
           ))
         }
@@ -275,3 +343,11 @@ const PageDiv = ({
   );
 }
 
+const generateSearchString: (card: Card) => string = (card) => {
+  const character = card.character;
+  const series = card.series;
+  let searchString:string = 
+  (character.split(' ').join('+') + '+' + 
+  series.split(' ').join('+'));
+  return searchString;
+}

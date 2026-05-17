@@ -121,36 +121,47 @@ button:focus-visible {
 
 
 .card-table td{
-  padding: 5px 8px;
+  padding: 5px 2px;
   border: solid #000;
-  border-width: 0 0px 2px 0;
+  border-width: 0 0px 2px 2px;
+  text-align: center;
+}
+
+.col-search{
+  width: 100px;
 }
 
 .col-check{
-  width: 4%;
-  /* margin: 0; */
+  width: 40px;
   cursor: pointer;
 }
 
 .col-code {
-  width: 7%;
+  width: 70px;
+  /* margin-left: 5px; */
 }
 
+
+
 .col-wl {
-  width: 5%;
+  width: 43px;
 }
 
 .col-name{
-  width: 19%;
+  width: 180px;
 }
+
+
 
 .col-edition{
   width: 3%;
 }
 
 .col-print{
-  width: 5%;
-  padding:0 7px;
+  width: 40px;
+  padding:0 5px;
+  /* margin:auto */
+  text-align: left;
 }
 td.col-print{
   /* width: 5%; */
@@ -159,25 +170,51 @@ td.col-print{
 }
 
 td.col-tag{
+  /* width:999px; */
   border-right : solid #000 2px;
 }
 
 .col-tag{
-  width: 8%;
+  width: 85px;
   /* border: solid */
   border-left-width: 11px;
+  /* padding: 0 1px; */
+  /* margin-left:10px; */
 }
 
-.td.col-tag {
-  border-left: 11px solid #000;
+td.col-tag {
+  /* border-left: 11px solid #000; */
+  text-align: left;
+  /* padding: 0 5px; */
+  padding-left:5px;
 }
 
+.col-quality {
+  width:40px;
+  /* border-right: 2px solid #000; */
+}
+
+.col-effort {
+  width: 50px;
+  /* border-right: 2px solid #000; */
+}
+
+.col-toughness {
+  width: 50px;
+  /* border-right: 2px solid #000; */
+}
 
 .card-table td.col-name,
 .card-table td.col-series {
-  white-space: nowrap;
+  /* white-space: nowrap; */
   overflow: hidden;
+  /* text-overflow: ellipsis; */
+  /* width: 2000px; */
+}
+
+.card-table .condensed{
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .taggingBar {
@@ -196,6 +233,10 @@ td.col-tag{
   height: 90px; /* tweak to match bar height */
 }
 
+button.navbar{
+  background:local;
+}
+
 .navbar{
   position: fixed;
   top: 0;
@@ -212,6 +253,15 @@ td.col-tag{
 #nav-button{
   margin: 0 3rem;
   
+}
+
+.tip-button{
+  background: local;
+  /* style: none; */
+}
+
+.navbar-options-button{
+  background: local;
 }
 
 .upload-button{

@@ -7,6 +7,9 @@ import {db} from './Upload';
 import './index.css'
 import calcMaxEffort from "./maxEffort";
 
+import { useContext } from "react";
+import { optionsContext } from "./App";
+
 
 type SelectedTableProps = {
   cards: Card[];
@@ -77,6 +80,8 @@ console.log("Matched rows:");
     //todo: Verify that changes applied, ensure UI picks this up too.
     
   }
+  // const context = useContext(optionsContext);
+
 
   return (
     <div className="tagMessageDiv">
@@ -193,10 +198,27 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTagMessages(prev => [...prev, ...prompts]);
   };
 
+  const {
+      condensedTable,
+      // hideWishlists,
+      // setHideWishlists,
+      hideToughness,
+      // setHideToughness,
+      hideDye,
+      // setHideDye,
+      hideFrame,
+      // setHideFrame,
+      hideEffort,
+      // setHideEffort,
+      hideQuality,
+      // setHideQuality
+  } = useContext(optionsContext);
 
   return (
     <div id='selected-table'>
-    <table className='card-table'>
+    <table className=
+      {condensedTable ? "card-table condensed" : "card-table"}
+    >
       <thead>
         <tr>
           <th scope="col"
@@ -215,12 +237,14 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
           <th className='col-print'>Print</th>
           <th className='col-tag'>Tag</th>
 {/* todo: learn about how to let users pick and choose which columns to see */}
-          <th className='col-quality'>Quality</th>
-          <th className='col-effort'>Effort</th>
-          <th className='col-toughness'>Toughness</th>
-          <th className='col-maxeffort'>Max Effort</th>
-          <th className='col-frame'>Frame</th>
-          <th className='col-dye'>Dye</th>
+          {!hideQuality && <th className='col-quality'>Quality</th>}
+          {/* <th className='col-quality'>Quality</th> */}
+          {!hideEffort && <th className='col-effort'>Effort</th>}
+          {/* <th className='col-effort'>Effort</th> */}
+          {!hideToughness && <th className='col-toughness'>Toughness</th>}
+          {!hideEffort && <th className='col-maxeffort'>Max Effort</th>}
+          {!hideFrame && <th className='col-frame'>Frame</th>}
+          {!hideDye && <th className='col-dye'>Dye</th>}
 
           <th>
             <p>Tag Selected As:</p>
@@ -262,14 +286,13 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             <td className="col-edition">{card.edition}</td>
             <td className="col-print">{card.number}</td>
             <td className="col-tag">{card.tag}</td>
-
-            <td className='col-quality'>{card.quality}</td>
-            <td className='col-effort'>{card.worker_effort}</td>
+            {!hideQuality && <td className='col-quality'>{card.quality}</td>}
+            {!hideEffort && <td className='col-effort'>{card.worker_effort}</td>}
             {/* todo: go back to upload.tsx and fix up worker fields if needed */}
-            <td className='col-toughness'>{card.worker_toughness}</td>
-            <td className='col-maxeffort'>{card.worker_effort ? calcMaxEffort(card) : ''}</td>
-            <td className='col-frame'>{card.frame}</td>
-            <td className='col-dye'>{card.dye_name}</td>
+            {!hideToughness && <td className='col-toughness'>{card.worker_toughness}</td>}
+            {!hideEffort && <td className='col-maxeffort'>{card.worker_effort ? calcMaxEffort(card) : ''}</td>}
+            {!hideFrame && <td className='col-frame'>{card.frame}</td>}
+            {!hideDye && <td className='col-dye'>{card.dye_name}</td>}
           </tr>
         ))}
       </tbody>

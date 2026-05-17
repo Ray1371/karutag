@@ -2,6 +2,9 @@
 // MainMenu.tsx
 // Primary UI + orchestration component
 // Handles uploads, search input, and displaying cards
+
+import {useContext} from 'react';
+import { optionsContext } from './App';
 import Navbar from "./Navbar";
 
 import CollectionTable from "./CollectionTable";
@@ -253,6 +256,7 @@ function toggleSort(nextKey: SortKey) {
   const autoAddBulkAriaLabel = `Auto-Add Bulk button adds all untagged cards 
   with 100 (by default) or fewer wishlists 
   and print number above 1000 to the selection.`;
+
 
   // -----------------------------
   // Render

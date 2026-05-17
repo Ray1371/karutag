@@ -126,13 +126,10 @@ export default function calcMaxEffort(card: Card): string {
     //Atm some values are still being inaccurate
 
     return String(
-    baseEffort +
-    '(' + 
-     predictedRegularDyeEffort +
-     ')' +
-      " [" +
+      predictedRegularDyeEffort +
+      " (" +
       predictedMysticDyeEffort +
-      "]"
+      ")"
     )
     ;
 
