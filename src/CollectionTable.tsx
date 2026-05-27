@@ -232,7 +232,14 @@ export default function CollectionTable({
                 <td className='col-toughness'>{card.worker_toughness}</td>
               )}
               {!hideEffort && (
-                <td className='col-maxeffort'>{card.worker_effort ? calcMaxEffort(card) : ''}</td>
+                <td className='col-maxeffort'>{(() => {
+                    const [reg, mystic] = card.regMaxEffort != null && card.mysticMaxEffort != null
+                      ? [card.regMaxEffort, card.mysticMaxEffort]
+                      : card.worker_effort != null
+                        ? calcMaxEffort(card)
+                        : [null, null];
+                    return reg != null ? <>{reg}{mystic != null ? <> (<strong>{mystic}</strong>)</> : ''}</> : '';
+                  })()}</td>
               )}
               {!hideFrame && (
                 <td className='col-frame'>{card.frame}</td>

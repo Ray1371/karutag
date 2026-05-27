@@ -45,6 +45,26 @@ type SelectedTableProps = {
     isSingleton: boolean;
 };
 
+// Prompt types for Tag and Sale message generation
+type TagPrompt = {
+  id: string;
+  tag: string;
+  codes: string[];
+  message: string;
+  isSingleton?: boolean;
+};
+
+type SalePrompt = {
+  id: string;
+  codes: string[];
+  wishlists: (number | null)[]; // allow null if wishlist missing
+  name: string[];
+  series: string[];
+  print: number[];
+  edition: number[];
+  messages: string[];
+};
+
 const TagMessage = (props: { 
     message: string;
     tag: string;
@@ -118,6 +138,67 @@ console.log("Matched rows:");
 }
 //Component that is generated.
 
+const SaleMessage = (
+  props: SalePrompt & { onDiscard: () => void }
+) => {
+  const [clicked, setClicked] = useState(false);
+
+  const handleClick = () => {
+    if (clicked === true) props.onDiscard();
+    setClicked(true);
+    setTimeout(() => setClicked(false), 5000);
+  };
+
+  // Build a human-readable message for this prompt. Each entry corresponds
+  // to one card; join with newlines for clipboard copy.
+  const lines = props.messages.length
+    ? props.messages
+    : props.codes.map((code, i) => {
+        const wl = props.wishlists?.[i] ?? '';
+        const name = props.name?.[i] ?? '';
+        const series = props.series?.[i] ?? '';
+        const print = props.print?.[i] ?? '';
+        const edition = props.edition?.[i] ?? '';
+        
+        return `${code} ❤️${wl} ${name} - ${series} - #${print} ◈${edition}`.trim();
+      });
+
+  const payload = lines.join('\n');
+  const excelLines = props.codes.map((code, i) => {
+    const wl = props.wishlists?.[i] ?? '';
+    const name = props.name?.[i] ?? '';
+    const series = props.series?.[i] ?? '';
+    const print = props.print?.[i] ?? '';
+    const edition = props.edition?.[i] ?? '';
+    return [code, wl, name, series, print, edition].join('\t');
+  });
+  const excelPayload = excelLines.join('\n');
+
+  return (
+    <div className="saleMessageDiv">
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(payload);
+          handleClick();
+        }}
+      >
+        <div>
+          {lines.map((l, idx) => (
+            <p key={idx}>{l}</p>
+          ))}
+          {clicked === true ? <p>Copied!</p> : <p>Click to copy above message</p>}
+        </div>
+      </button>
+      <div>
+        <button onClick={props.onDiscard}>Discard / Close</button>
+        <button onClick={() => navigator.clipboard.writeText(excelPayload)}>
+          Copy Excel Format
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function SelectedTable({
   cards,
   selected,
@@ -131,12 +212,13 @@ export default function SelectedTable({
     return <div>No cards selected.</div>;
   }
   //state to hold tag message components. Would like these to persist across user sessions until cleared or user re-uploads collection.
-type TagPrompt = { id: string; tag: string; codes: string[]; message: string };
-  const [tagMessages, setTagMessages] = useState<TagPrompt[]>([]);
-  const [tagName, setTagName] = useState('');
+const [tagMessages, setTagMessages] = useState<TagPrompt[]>([]);
+const [tagName, setTagName] = useState('');
 const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
   setTagName(event.target.value);
 };
+
+  const [saleMessages, setSaleMessages] = useState<SalePrompt[]>([]);
 
 //todo: style borders onto the generated components
 //todo: implement so that if user clicks message while applied is true, auto-closes the component after copying
@@ -147,8 +229,6 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     selected.forEach((code) => {
       selectedCards.push(code);
     });
-
-
 
     const prompts:TagPrompt[] = [];
     let chunk: string[] = [];
@@ -198,10 +278,28 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTagMessages(prev => [...prev, ...prompts]);
   };
 
+  const generateSellMessages = () => {
+    // Build a SalePrompt for each selected card using the in-memory `cards`.
+    const prompts: SalePrompt[] = [];
+    selected.forEach((code) => {
+      const card = cards.find((c) => c.code === code);
+      if (!card) return;
+      const msg = `${card.code} ❤️${card.wishlists} ${card.character} - ${card.series} - #${card.number} ◈${card.edition}`;
+      prompts.push({
+        id: crypto.randomUUID(),
+        codes: [card.code],
+        wishlists: [card.wishlists],
+        name: [card.character],
+        series: [card.series],
+        print: [card.number],
+        edition: [card.edition],
+        messages: [msg],
+      });
+    });
+    if (prompts.length > 0) setSaleMessages((prev) => [...prev, ...prompts]);
+  }
   const {
       condensedTable,
-      // hideWishlists,
-      // setHideWishlists,
       hideToughness,
       // setHideToughness,
       hideDye,
@@ -255,7 +353,9 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             value={tagName} onChange={handleChange}
             />
             <button onClick={() => generatePrompts(isSingleton)}>Tag Selected</button>
+            <button onClick={() => generateSellMessages()}>Generate Sale Messages</button>
           </th>
+          
           
         </tr>
       </thead>
@@ -290,7 +390,14 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             {!hideEffort && <td className='col-effort'>{card.worker_effort}</td>}
             {/* todo: go back to upload.tsx and fix up worker fields if needed */}
             {!hideToughness && <td className='col-toughness'>{card.worker_toughness}</td>}
-            {!hideEffort && <td className='col-maxeffort'>{card.worker_effort ? calcMaxEffort(card) : ''}</td>}
+            {!hideEffort && <td className='col-maxeffort'>{(() => {
+                const [reg, mystic] = card.regMaxEffort != null && card.mysticMaxEffort != null
+                  ? [card.regMaxEffort, card.mysticMaxEffort]
+                  : card.worker_effort != null
+                    ? calcMaxEffort(card)
+                    : [null, null];
+                return reg != null ? <>{reg}{mystic != null ? <> (<strong>{mystic}</strong>)</> : ''}</> : '';
+              })()}</td>}
             {!hideFrame && <td className='col-frame'>{card.frame}</td>}
             {!hideDye && <td className='col-dye'>{card.dye_name}</td>}
           </tr>
@@ -314,12 +421,27 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         ))}
       </div>
     )} 
+    {saleMessages.length > 0 && (
+      <div>
+        {saleMessages.map((p) => (
+          <SaleMessage
+            key={p.id}
+            id={p.id}
+            codes={p.codes}
+            wishlists={p.wishlists}
+            name={p.name}
+            series={p.series}
+            print={p.print}
+            edition={p.edition}
+            messages={p.messages}
+            onDiscard={() => setSaleMessages((prev) => prev.filter((x) => x.id !== p.id))}
+          />
+        ))}
+      </div>
+    )}
     </div>
     
   );
 }
 
 
-// const nameCheck = (name: string | undefined):string => {
-//   return name.includes('Mystic') ? 'Mystic Dye' : 'false';
-// }

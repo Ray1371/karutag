@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import Dexie, { type EntityTable } from 'dexie';
 
 import type { progressSignal } from './progressSignals';
+import calcMaxEffort from './maxEffort';
 
 // --------------------
 // Types
@@ -33,7 +34,8 @@ interface Card {
   worker_purity:string;
   worker_dropper:string;
   worker_grabber:string;
-
+  regMaxEffort?: number;
+  mysticMaxEffort?: number;
 
   // tokens for partial match searching
   charaTokens: string[];
@@ -105,10 +107,13 @@ export const handleUpload = async (
       // IMPORTANT: token generation needs to happen before bulkPut
       const card = row.data;
 
+      const [regMaxEffort, mysticMaxEffort] = calcMaxEffort(card);
       buffer.push({
         ...card,
         charaTokens: makeTokens(card.character),
         seriesTokens: makeTokens(card.series),
+        regMaxEffort,
+        mysticMaxEffort,
       });
 
       if (buffer.length >= BATCH_SIZE) {

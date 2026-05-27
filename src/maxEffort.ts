@@ -69,15 +69,15 @@ const PURITY_CONVERSION = (grade:string):number => {
 //TODO: need to account wellness as well; apparently adds 25% of ALL other stats, and after a bit of testing, seems to hold
 
 //base = ((1-(burned/claimed) * (claimed/generated) * 101261). Clearly can't just find that in the data though.
-export default function calcMaxEffort(card: Card): string {
+export default function calcMaxEffort(card: Card): [number, number] {
     //for some reason stuff is returning 0 now.
     const quality = Number(card.quality);
     const initialEffort = Number(card.worker_effort);//where we started
     const toughnessGrade:string = card.worker_toughness || 'F';
     //Check if card is already fully upgraded; if so, return current effort.
     //Idk if I want to inform them.
-    if(toughnessGrade === 'S' && card.frame && card.frame !== '' &&  card.dye_name?.includes('Mystic'))
-        return String(initialEffort);
+    if (toughnessGrade === 'S' && card.frame && card.frame !== '' && card.dye_name?.includes('Mystic'))
+        return [initialEffort, initialEffort];
 
     //Get base value first, whether from upgrading or downgrading the card
     let baseEffort = deriveBaseValue(card);
@@ -125,13 +125,7 @@ export default function calcMaxEffort(card: Card): string {
 
     //Atm some values are still being inaccurate
 
-    return String(
-      predictedRegularDyeEffort +
-      " (" +
-      predictedMysticDyeEffort +
-      ")"
-    )
-    ;
+    return [predictedRegularDyeEffort, predictedMysticDyeEffort];
 
 
 
