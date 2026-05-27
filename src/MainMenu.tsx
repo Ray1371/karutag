@@ -18,6 +18,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 // import handleUpload, { db } from './Upload';
 import {db} from './Upload';
 import type { Card } from './Upload';
+import calcMaxEffort from './maxEffort';
 
 
 import { searchCards,
@@ -80,11 +81,31 @@ export default function MainMenu() {
 
   function getSortValue(card: Card, key: SortKey): unknown {
     switch (key) {
-      case 'wishlists': return card.wishlists;
-      case 'number': return card.number;
-      case 'character': return card.character;
-      case 'series': return card.series;
-      case 'edition': return card.edition;
+      case 'wishlists':
+        return card.wishlists;
+      case 'number':
+        return card.number;
+      case 'character':
+        return card.character;
+      case 'series':
+        return card.series;
+      case 'edition':
+        return card.edition;
+      case 'tag':
+        return card.tag ?? '';
+      case 'quality':
+        return card.quality ?? '';
+      case 'frame':
+        return card.frame ?? '';
+      case 'dye_name':
+        return card.dye_name ?? '';
+      case 'worker.effort':
+        return card.worker_effort ?? 0;
+      case 'maxeffort': {
+        if (card.regMaxEffort != null) return card.regMaxEffort;
+        if (card.worker_effort != null) return calcMaxEffort(card)[0];
+        return 0;
+      }
     }
   }
 
