@@ -105,16 +105,25 @@ console.log("Matched rows:");
 
   return (
     <div className="tagMessageDiv">
-      <button onClick={() => {
-        navigator.clipboard.writeText(`kt ${props.tag} ${props.message}`);
-        handleClick();
-      }}>
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(`kt ${props.tag} ${props.message}`);
+          handleClick();
+        }}
+        onDoubleClick={async () => {
+          await applyChange();
+          setApplied(true);
+          setTimeout(() => {
+            setApplied(false);
+          }, 5000);
+        }}
+      >
         <div>
           <p>kt {props.tag} {props.message}</p>
           {clicked === true ?
             <p>Copied!</p>
             :
-            <p>Click to copy above message</p>
+            <p>Click to copy, double-click to apply the tag</p>
           }
         </div>
       </button>
