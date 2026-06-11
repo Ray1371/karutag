@@ -339,20 +339,69 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
               {sortKey === 'wishlists' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             </th>
-          <th className="col-name">Character</th>
-          <th className="col-series">Series</th>
-          <th className='col-edition'>Ed.</th>
-          <th className='col-print'>Print</th>
-          <th className='col-tag'>Tag</th>
+          <th className="col-name">
+            <button onClick={() => onToggleSort('character')}>
+              {sortKey === 'character' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Character
+          </th>
+          <th className="col-series">
+            <button onClick={() => onToggleSort('series')}>
+              {sortKey === 'series' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Series
+          </th>
+          <th className='col-edition'>
+            <button onClick={() => onToggleSort('edition')}>
+              {sortKey === 'edition' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Ed.
+          </th>
+          <th className='col-print'>
+            <button onClick={() => onToggleSort('number')}>
+              {sortKey === 'number' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Print
+          </th>
+          <th className='col-tag'>
+            <button onClick={() => onToggleSort('tag')}>
+              {sortKey === 'tag' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Tag
+          </th>
 {/* todo: learn about how to let users pick and choose which columns to see */}
-          {!hideQuality && <th className='col-quality'>Quality</th>}
+          {!hideQuality && <th className='col-quality'>
+            <button onClick={() => onToggleSort('quality')}>
+              {sortKey === 'quality' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Quality
+          </th>}
           {/* <th className='col-quality'>Quality</th> */}
-          {!hideEffort && <th className='col-effort'>Effort</th>}
-          {/* <th className='col-effort'>Effort</th> */}
+          {!hideEffort && <th className='col-effort'>
+            <button onClick={() => onToggleSort('worker.effort')}>
+              {sortKey === 'worker.effort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Effort
+          </th>}
           {!hideToughness && <th className='col-toughness'>Toughness</th>}
-          {!hideEffort && <th className='col-maxeffort'>Max Effort</th>}
-          {!hideFrame && <th className='col-frame'>Frame</th>}
-          {!hideDye && <th className='col-dye'>Dye</th>}
+          {!hideEffort && <th className='col-maxeffort'>
+            <button onClick={() => onToggleSort('maxeffort')}>
+              {sortKey === 'maxeffort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Max Effort
+          </th>}
+          {!hideFrame && <th className='col-frame'>
+            <button onClick={() => onToggleSort('frame')}>
+              {sortKey === 'frame' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Frame
+          </th>}
+          {!hideDye && <th className='col-dye'>
+            <button onClick={() => onToggleSort('dye_name')}>
+              {sortKey === 'dye_name' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+            </button>
+            Dye
+          </th>}
 
           <th>
             <p>Tag Selected As:</p>
