@@ -9,7 +9,7 @@ import calcMaxEffort from "./maxEffort";
 
 import { useContext } from "react";
 import { optionsContext } from "./App";
-
+import { IoIosSearch } from "react-icons/io"; 
 
 type SelectedTableProps = {
   cards: Card[];
@@ -328,6 +328,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     >
       <thead>
         <tr>
+          <th scope="col" className="col-search"></th>
           <th scope="col"
             className="col-check"
           >Selected</th>
@@ -372,6 +373,15 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
       <tbody>
         {cards.map((card) => (
           <tr key={card.code}>
+            <td className="col-search">
+              <button onClick={() => 
+                {
+                  open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
+                }
+              }>
+                <IoIosSearch />
+              </button>
+            </td>
             <td
               className="col-check"
             >
@@ -453,4 +463,11 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
   );
 }
 
-
+const generateSearchString: (card: Card) => string = (card) => {
+  const character = card.character;
+  const series = card.series;
+  let searchString:string = 
+  (character.split(' ').join('+') + '+' + 
+  series.split(' ').join('+'));
+  return searchString;
+}

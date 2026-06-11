@@ -33,7 +33,7 @@ export default function CollectionTable({
   cards,
   selected,
   onToggleOne,
-  allSelected,
+  // allSelected,
   onToggleSelectAll,
   sortKey,
   sortDir,
@@ -79,6 +79,20 @@ export default function CollectionTable({
       // setHideQuality
   } = useContext(optionsContext);
 
+  const handleSelectPageToggle = () => {
+    const allPageCardsSelected = displayedCards.every(card => selected.has(card.code));
+    displayedCards.forEach(card => {
+      const isSelected = selected.has(card.code);
+      if (allPageCardsSelected && isSelected) {
+        // Deselect all on page
+        onToggleOne(card.code);
+      } else if (!allPageCardsSelected && !isSelected) {
+        // Select all on page
+        onToggleOne(card.code);
+      }
+    });
+  };
+
   
   
   return (
@@ -98,13 +112,12 @@ export default function CollectionTable({
           <th scope="col"
             className="col-check"
           >
-            <input
-              type="checkbox"
-              aria-label="Select all cards"
-              checked={allSelected}
-              onChange={onToggleSelectAll}
-              
-            />
+            <button onClick={onToggleSelectAll}>
+              Select All Cards
+            </button>
+            <button onClick={handleSelectPageToggle}>
+              Select Page
+            </button>
           </th>
           <th className="col-code">Code</th>
           <th className="col-wl">
