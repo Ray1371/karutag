@@ -229,15 +229,18 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 
   const [saleMessages, setSaleMessages] = useState<SalePrompt[]>([]);
 
+  const [newTagsByCode, setNewTagsByCode] = useState<Record<string, string>>({});
+
 //todo: style borders onto the generated components
 //todo: implement so that if user clicks message while applied is true, auto-closes the component after copying
 
-  const generatePrompts = (isSingleton: boolean) => {
+  const generatePrompts = (tag:string, isSingleton: boolean, codes?: string[]) => {
     //get all card codes from selected set
     let selectedCards: string[] = [];
-    selected.forEach((code) => {
+    // selected.forEach((code) => {
+    for(const code of codes ?? selected) {
       selectedCards.push(code);
-    });
+    };
 
     const prompts:TagPrompt[] = [];
     let chunk: string[] = [];
@@ -248,7 +251,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         //create prompt for each individual card
         prompts.push({
           id: crypto.randomUUID(),
-          tag: tagName,
+          tag: tag,
           codes: [...chunk],               // ✅ the real source of truth
           message: chunk.join(" "),        // whatever you want to display/copy
         });
@@ -264,7 +267,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         if(chunk.length === 50) {
           prompts.push({
             id: crypto.randomUUID(),
-            tag: tagName,
+            tag: tag,
             codes: [...chunk],               // ✅ the real source of truth
             message: chunk.join(" "),        // whatever you want to display/copy
           });
@@ -276,7 +279,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (chunk.length > 0) {
           prompts.push({
             id: crypto.randomUUID(),
-            tag: tagName,
+            tag: tag,
             codes: [...chunk],               // ✅ the real source of truth
             message: chunk.join(" "),        // whatever you want to display/copy
 
@@ -320,6 +323,56 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
       hideQuality,
       // setHideQuality
   } = useContext(optionsContext);
+
+  const newTagPromptGenerator = () => {
+    // Implementation for generating new tag prompts
+    // let tagMessages: TagPrompt[] = [];
+    type TagCodes = {
+      tag:string;
+      codes:string[];
+    }
+    let tagCodes: TagCodes[] = [];
+
+
+    for (const code of Object.keys(newTagsByCode)) {
+      // Generate a new tag prompt for each code
+      //if no tag was given, skip
+      if (!newTagsByCode[code]?.trim()) {
+        continue;
+      }
+      //if there's no TagCode for the tag, create it
+      if(!tagCodes.some(tag => tag.tag === newTagsByCode[code])) {
+        //TODO: still need to add the rest of the structure
+        tagCodes.push({
+          tag: newTagsByCode[code],
+          codes: [code]
+        });
+      }
+      else {
+        //if there is a TagCode for the tag, add the code to it
+        const existingTag = tagCodes.find(tag => tag.tag === newTagsByCode[code]);
+        if(existingTag) {
+          existingTag.codes.push(code);
+        }
+      }
+    }
+    for (const tagCode of tagCodes) {
+      // Plan: Generate prompts given the tagCode, while still accounting for singleton toggle;
+      //might need to remake due to the original method lazily doing all the one tag for all messages at once.
+      generatePrompts(tagCode.tag, isSingleton, tagCode.codes);
+    }
+  };
+
+  //this should get called by a prompt generator, but not the one that tags all the selected cards
+  // const setNewTags = () => {
+  //   selected.forEach((code) => {
+  //     const newTag = newTagsByCode[code]?.trim();
+  //     if (newTag) {
+  //       // Use the newTag value
+  //       db.collection.update(code, { tag: newTag });
+  //     }
+  //   });
+  // };
 
   return (
     <div id='selected-table'>
@@ -404,17 +457,18 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
           </th>}
 
           <th>
-            <p>Tag Selected As:</p>
+            <p>Tag All Below As:</p>
             <input 
              className="wider-input"
              type="text"
              placeholder="Enter tag name" 
             value={tagName} onChange={handleChange}
             />
-            <button onClick={() => generatePrompts(isSingleton)}>Tag Selected</button>
+            <button onClick={() => generatePrompts(tagName, isSingleton)}>Tag All </button>
             <button onClick={() => generateSellMessages()}>Generate Sale Messages</button>
+            <button onClick={() => newTagPromptGenerator()}>Set New Tags</button>
           </th>
-          
+          <th className='col-newtag'>New Tag? </th>
           
         </tr>
       </thead>
@@ -468,6 +522,23 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
               })()}</td>}
             {!hideFrame && <td className='col-frame'>{card.frame}</td>}
             {!hideDye && <td className='col-dye'>{card.dye_name}</td>}
+              <td className='col-newtag'>
+                  <input 
+                  name='newTag' 
+                  id='newTag'
+                  type='text' 
+                  placeholder='Enter new tag?' 
+                  autoComplete='tags'
+
+                  onChange={(e) => {
+                    setNewTagsByCode((prev) => ({
+                      ...prev,
+                      [card.code]: e.target.value,
+                    }));
+                }}
+
+                  />
+              </td>
           </tr>
         ))}
       </tbody>

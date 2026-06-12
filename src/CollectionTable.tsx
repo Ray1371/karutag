@@ -195,6 +195,7 @@ export default function CollectionTable({
             
             </th>
           )}
+
         </tr>
       </thead>
 
@@ -260,6 +261,7 @@ export default function CollectionTable({
               {!hideDye && (
                 <td className='col-dye'>{card.dye_name}</td>
               )}
+
             </tr>
           ))
         }
