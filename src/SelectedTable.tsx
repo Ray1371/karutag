@@ -394,7 +394,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     >
       <thead>
         <tr>
-          <th scope="col" className="col-search"></th>
+
           <th scope="col"
             className="col-check"
           >Selected</th>
@@ -485,6 +485,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             <button tabIndex={-1} onClick={() => newTagPromptGenerator()}>Set New Tags</button>
           </th>
           <th className='col-newtag'>New Tag? </th>
+          <th scope="col" className="col-search"></th>
           
         </tr>
       </thead>
@@ -492,15 +493,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
       <tbody>
         {cards.map((card) => (
           <tr key={card.code}>
-            <td className="col-search">
-              <button tabIndex={-1} onClick={() => 
-                {
-                  open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
-                }
-              }>
-                <IoIosSearch />
-              </button>
-            </td>
+
             <td
               className="col-check"
             >
@@ -555,7 +548,16 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
                 }}
 
                   />
-              </td>
+            </td>
+                          <td className="col-search">
+              <button tabIndex={-1} onClick={() => 
+                {
+                  open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
+                }
+              }>
+                <IoIosSearch />
+              </button>
+            </td>
           </tr>
         ))}
       </tbody>
