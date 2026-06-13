@@ -61,7 +61,6 @@ export default function CollectionTable({
   if (currentPage < 1) setCurrentPage(1);
 }, [maxPage, currentPage]);
 
-  // const context = useContext(optionsContext);
   const {
       condensedTable,
       // setCondensedTable,

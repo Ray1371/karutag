@@ -1,7 +1,6 @@
 //idea: start context here
 import { 
   useState,
-  // useContext,
   useEffect,
   createContext,
   
@@ -33,28 +32,6 @@ type OptionsContextType = {
   setHideQuality: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-  // export const optionsContext = createContext(
-  //   {
-  //   // is there a way to grab actual values from localStorage here instead of hardcoding false? if not, then maybe just have the default be false and then when the MenuTopOptions component mounts, 
-  //   // have it update the context with the actual values from localStorage?
-  //     condensedTable: localStorage.getItem('condensedTable') === 'true' || false,
-  //     setCondensedTable: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //     hideWishlists: localStorage.getItem('hideWishlists') === 'true' || false,
-  //     setHideWishlists: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //     hideToughness: localStorage.getItem('hideToughness') === 'true' || false,
-  //     setHideToughness: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //     hideDye: localStorage.getItem('hideDye') === 'true' || false,
-  //     setHideDye: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //     hideFrame: localStorage.getItem('hideFrame') === 'true' || false,
-  //     setHideFrame: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //     hideEffort: localStorage.getItem('hideEffort') === 'true' || false,
-  //     setHideEffort: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //     hideQuality: localStorage.getItem('hideQuality') === 'true' || false,
-  //     setHideQuality: (value: boolean) => {}, // Placeholder function, will be overridden by the provider
-  //   }
-  // );
-// export const optionsContext =
-//   createContext<OptionsContextType | null>(null);
   export const optionsContext = createContext<OptionsContextType>({
     condensedTable: localStorage.getItem('condensedTable') === 'true' || false,
     setCondensedTable: () => {}, // Placeholder function, will be overridden by the provider
@@ -71,6 +48,8 @@ type OptionsContextType = {
     hideQuality: localStorage.getItem('hideQuality') === 'true' || false,
     setHideQuality: () => {}, // Placeholder function, will be overridden by the provider
   });
+
+  export const TagListContext = createContext<string[]>([]);
   
 function App() {
   const [hasUploaded, setHasUploaded] = useState(
@@ -99,18 +78,6 @@ function App() {
   const [hideQuality, setHideQuality] = useState(
     localStorage.getItem('hideQuality') === 'true' || false
   );
-
-   //context stuff; load settings from localStorage here and then 
-   // pass them down via context provider. 
-   // also have the functions to update those settings here as well,
-   //  and pass those down too.
-  // const condensedTable = JSON.parse(localStorage.getItem('condensedTable') || '{}');
-  // const hideWishlists = JSON.parse(localStorage.getItem('hideWishlists') || '{}');
-  // const hideToughness = JSON.parse(localStorage.getItem('hideToughness') || '{}');
-  // const hideDye = JSON.parse(localStorage.getItem('hideDye') || '{}');
-  // const hideFrame = JSON.parse(localStorage.getItem('hideFrame') || '{}');
-  // const hideEffort = JSON.parse(localStorage.getItem('hideEffort') || '{}');
-  // const hideQuality = JSON.parse(localStorage.getItem('hideQuality') || '{}');
 
   useEffect(() => {
     // Save settings to localStorage whenever they change

@@ -3,8 +3,7 @@
 // Primary UI + orchestration component
 // Handles uploads, search input, and displaying cards
 
-// import {useContext} from 'react';
-// import { optionsContext } from './App';
+
 import Navbar from "./Navbar";
 
 import CollectionTable from "./CollectionTable";
@@ -19,7 +18,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {db} from './Upload';
 import type { Card } from './Upload';
 import calcMaxEffort from './maxEffort';
-
+import { TagListContext } from './App';
 
 import { searchCards,
          TEXT_KEYS,
@@ -32,6 +31,12 @@ export default function MainMenu() {
 //Sorting logic
   type SortDir = 'asc' | 'desc';
   type SortKey = 'wishlists' | 'character' | 'series' | 'edition' | 'number' | 'tag' | 'quality' | 'worker.effort' | 'maxeffort' | 'frame' | 'dye_name';
+
+  //todo: pass this to SelectedTable
+  //get list of tags for newtag to use
+  const [tagList, setTagList] = useState<string[]>([]);
+
+
 
   // Upload-related state
   // const [_selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -66,6 +71,20 @@ export default function MainMenu() {
     [],
     []
   );
+
+    useEffect(() => {
+    //get collection, then get unique tags
+    const cards = fullCollection ?? [];
+    const uniqueTags = Array.from(
+      new Set(
+        cards
+          .map((card) => card.tag)
+          .filter((tag): tag is string => typeof tag === 'string' && tag.trim() !== '')
+      )
+    );
+
+    setTagList(uniqueTags);
+  }, [fullCollection]);
 
   const selectedCards =
   (fullCollection ?? []).filter((c) => selected.has(c.code));
@@ -373,16 +392,18 @@ function toggleSort(nextKey: SortKey) {
 
 {/* Table for Selected Cards */}
     <h2>Selected Cards ({selectedCards.length})</h2>
-    <SelectedTable
-      // cards={selectedCards}
-        cards={sortedSelectedCards}
-       selected={selected}
-       onToggleOne={toggleOne}
-        isSingleton={isSingleton}
-        sortKey={sortKey}
-         sortDir={sortDir}
-         onToggleSort={toggleSort}
-    />
+    <TagListContext.Provider value={tagList}>
+      <SelectedTable
+        // cards={selectedCards}
+          cards={sortedSelectedCards}
+        selected={selected}
+        onToggleOne={toggleOne}
+          isSingleton={isSingleton}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onToggleSort={toggleSort}
+      />
+    </TagListContext.Provider>
 
       {/* Upload progress */}
       {isUploading && (

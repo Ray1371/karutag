@@ -1,15 +1,17 @@
 import type { Card } from "./Upload";
 // import { useState } from "react";
 // import Dexie from "dexie";
-import { useState, type ChangeEvent } from "react";
+import { useState, 
+   type ChangeEvent } from "react";
 import {db} from './Upload';
 // import { TaggingBarPortal } from "./TagPortal";
 import './index.css'
 import calcMaxEffort from "./maxEffort";
 
 import { useContext } from "react";
-import { optionsContext } from "./App";
+import { optionsContext, TagListContext } from "./App";
 import { IoIosSearch } from "react-icons/io"; 
+
 
 type SelectedTableProps = {
   cards: Card[];
@@ -100,12 +102,13 @@ console.log("Matched rows:");
     //todo: Verify that changes applied, ensure UI picks this up too.
     
   }
-  // const context = useContext(optionsContext);
+
 
 
   return (
     <div className="tagMessageDiv">
       <button
+        tabIndex={-1}
         onClick={() => {
           navigator.clipboard.writeText(`kt ${props.tag} ${props.message}`);
           handleClick();
@@ -130,6 +133,7 @@ console.log("Matched rows:");
       <div>
         {/* todo: Implement apply change event */}
         <button 
+        tabIndex={-1}
         onClick={() => {
           applyChange();
           setApplied(true);
@@ -140,7 +144,7 @@ console.log("Matched rows:");
         disabled={applied}
         >Apply Change</button>
         {/* todo: Implement discard change event = just close this box. */}
-        <button onClick={props.onDiscard}>Discard Change / Close This Box</button>
+        <button tabIndex={-1} onClick={props.onDiscard}>Discard Change / Close This Box</button>
       </div>
     </div>
   );
@@ -186,6 +190,7 @@ const SaleMessage = (
   return (
     <div className="saleMessageDiv">
       <button
+        tabIndex={-1}
         onClick={() => {
           navigator.clipboard.writeText(payload);
           handleClick();
@@ -199,8 +204,8 @@ const SaleMessage = (
         </div>
       </button>
       <div>
-        <button onClick={props.onDiscard}>Discard / Close</button>
-        <button onClick={() => navigator.clipboard.writeText(excelPayload)}>
+        <button tabIndex={-1} onClick={props.onDiscard}>Discard / Close</button>
+        <button tabIndex={-1} onClick={() => navigator.clipboard.writeText(excelPayload)}>
           Copy Excel Format
         </button>
       </div>
@@ -220,6 +225,22 @@ export default function SelectedTable({
   if (cards.length === 0) {
     return <div>No cards selected.</div>;
   }
+
+//get list of tags for newtag to use
+//   const [tagList, setTagList] = useState<string[]>([]);
+//   useEffect(() => {
+//   const uniqueTags = Array.from(
+//     new Set(
+//       cards
+//         .map((card) => card.tag)
+//         .filter((tag): tag is string => typeof tag === "string" && tag.trim() !== "")
+//     )
+//   );
+
+//   setTagList(uniqueTags);
+// }, []);
+  
+
   //state to hold tag message components. Would like these to persist across user sessions until cleared or user re-uploads collection.
 const [tagMessages, setTagMessages] = useState<TagPrompt[]>([]);
 const [tagName, setTagName] = useState('');
@@ -228,7 +249,6 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 };
 
   const [saleMessages, setSaleMessages] = useState<SalePrompt[]>([]);
-
   const [newTagsByCode, setNewTagsByCode] = useState<Record<string, string>>({});
 
 //todo: style borders onto the generated components
@@ -324,6 +344,8 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
       // setHideQuality
   } = useContext(optionsContext);
 
+  const tagList = useContext(TagListContext);
+
   const newTagPromptGenerator = () => {
     // Implementation for generating new tag prompts
     // let tagMessages: TagPrompt[] = [];
@@ -363,16 +385,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     }
   };
 
-  //this should get called by a prompt generator, but not the one that tags all the selected cards
-  // const setNewTags = () => {
-  //   selected.forEach((code) => {
-  //     const newTag = newTagsByCode[code]?.trim();
-  //     if (newTag) {
-  //       // Use the newTag value
-  //       db.collection.update(code, { tag: newTag });
-  //     }
-  //   });
-  // };
+
 
   return (
     <div id='selected-table'>
@@ -388,69 +401,69 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
           <th className="col-code">Code</th>
           <th className="col-wl">
             WLs
-            <button onClick={() => onToggleSort('wishlists')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('wishlists')}>
               {sortKey === 'wishlists' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             </th>
           <th className="col-name">
-            <button onClick={() => onToggleSort('character')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('character')}>
               {sortKey === 'character' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Character
           </th>
           <th className="col-series">
-            <button onClick={() => onToggleSort('series')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('series')}>
               {sortKey === 'series' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Series
           </th>
           <th className='col-edition'>
-            <button onClick={() => onToggleSort('edition')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('edition')}>
               {sortKey === 'edition' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Ed.
           </th>
           <th className='col-print'>
-            <button onClick={() => onToggleSort('number')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('number')}>
               {sortKey === 'number' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Print
           </th>
           <th className='col-tag'>
-            <button onClick={() => onToggleSort('tag')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('tag')}>
               {sortKey === 'tag' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Tag
           </th>
 {/* todo: learn about how to let users pick and choose which columns to see */}
           {!hideQuality && <th className='col-quality'>
-            <button onClick={() => onToggleSort('quality')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('quality')}>
               {sortKey === 'quality' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Quality
           </th>}
           {/* <th className='col-quality'>Quality</th> */}
           {!hideEffort && <th className='col-effort'>
-            <button onClick={() => onToggleSort('worker.effort')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('worker.effort')}>
               {sortKey === 'worker.effort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Effort
           </th>}
           {!hideToughness && <th className='col-toughness'>Toughness</th>}
           {!hideEffort && <th className='col-maxeffort'>
-            <button onClick={() => onToggleSort('maxeffort')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('maxeffort')}>
               {sortKey === 'maxeffort' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Max Effort
           </th>}
           {!hideFrame && <th className='col-frame'>
-            <button onClick={() => onToggleSort('frame')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('frame')}>
               {sortKey === 'frame' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Frame
           </th>}
           {!hideDye && <th className='col-dye'>
-            <button onClick={() => onToggleSort('dye_name')}>
+            <button tabIndex={-1} onClick={() => onToggleSort('dye_name')}>
               {sortKey === 'dye_name' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
             </button>
             Dye
@@ -462,11 +475,14 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
              className="wider-input"
              type="text"
              placeholder="Enter tag name" 
-            value={tagName} onChange={handleChange}
+             list="tagList"
+             tabIndex={0}
+             value={tagName} onChange={handleChange}
             />
-            <button onClick={() => generatePrompts(tagName, isSingleton)}>Tag All </button>
-            <button onClick={() => generateSellMessages()}>Generate Sale Messages</button>
-            <button onClick={() => newTagPromptGenerator()}>Set New Tags</button>
+
+            <button tabIndex={-1} onClick={() => generatePrompts(tagName, isSingleton)}>Tag All </button>
+            <button tabIndex={-1} onClick={() => generateSellMessages()}>Generate Sale Messages</button>
+            <button tabIndex={-1} onClick={() => newTagPromptGenerator()}>Set New Tags</button>
           </th>
           <th className='col-newtag'>New Tag? </th>
           
@@ -477,7 +493,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         {cards.map((card) => (
           <tr key={card.code}>
             <td className="col-search">
-              <button onClick={() => 
+              <button tabIndex={-1} onClick={() => 
                 {
                   open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
                 }
@@ -489,8 +505,7 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
               className="col-check"
             >
               <input
-                type="checkbox"
-                aria-label={`Deselect ${card.character}`}
+                type="checkbox"                tabIndex={-1}                aria-label={`Deselect ${card.character}`}
                 checked={selected.has(card.code)}
                 onChange={() => onToggleOne(card.code)}
                 className="col-check"
@@ -524,12 +539,14 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             {!hideDye && <td className='col-dye'>{card.dye_name}</td>}
               <td className='col-newtag'>
                   <input 
-                  name='newTag' 
-                  id='newTag'
+                  name={`newTag-${card.code}`} 
+                  id={`newTag-${card.code}`}
                   type='text' 
                   placeholder='Enter new tag?' 
                   autoComplete='tags'
-
+                  list='tagList'
+                  value={newTagsByCode[card.code] ?? ''}
+                  tabIndex={0}
                   onChange={(e) => {
                     setNewTagsByCode((prev) => ({
                       ...prev,
@@ -543,6 +560,11 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         ))}
       </tbody>
     </table>
+    <datalist id="tagList">
+      {tagList.map((option) => (
+        <option key={option} value={option} />
+      ))}
+    </datalist>
     <div id='tag-messages'
       className="pageBottomSpacer" />
      {tagMessages.length > 0 && (
