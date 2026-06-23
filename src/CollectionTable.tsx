@@ -6,6 +6,7 @@ import { IoIosSearch } from "react-icons/io";
 import { optionsContext
 
  } from "./App";
+import { WishlistStarButton } from './Wishlist';
 type CollectionTableProps = {
   cards: Card[];
   selected: Set<string>;
@@ -27,6 +28,7 @@ type CollectionTableProps = {
     | 'maxeffort'
     | 'frame'
   ) => void;
+  onSearchButtonClick: (url: string) => void;
 };
 
 export default function CollectionTable({
@@ -37,7 +39,8 @@ export default function CollectionTable({
   onToggleSelectAll,
   sortKey,
   sortDir,
-  onToggleSort
+  onToggleSort,
+  onSearchButtonClick,
 }: CollectionTableProps) {
     //pagination component state
   const [currentPage, setCurrentPage] = useState(1);
@@ -205,11 +208,7 @@ export default function CollectionTable({
             className={`align-text-left`}
             >
               <td>
-                <button onClick={() => 
-                  {
-                    open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
-                  }
-                }>
+                <button onClick={() => onSearchButtonClick(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)}>
                   <IoIosSearch />
                 </button>
               </td>
@@ -220,6 +219,11 @@ export default function CollectionTable({
                   checked={selected.has(card.code)}
                   onChange={() => onToggleOne(card.code)}
                   className="col-check"
+                />
+                <WishlistStarButton
+                  name={card.character}
+                  series={card.series}
+                  edition={card.edition}
                 />
               </td>
               <td className="code-column">{card.code}</td>

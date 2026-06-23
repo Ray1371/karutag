@@ -42,6 +42,15 @@ interface Card {
   seriesTokens: string[];
 }
 
+interface WishlistItem {
+  nameseries: string;
+  name: string;
+  series: string;
+  editions: boolean[];//maybe just have multiple editions, because it is possible to have multiple editions of the same card in a wishlist.
+  hunting?: number;
+  comment?: string;
+}
+
 // --------------------
 // Dexie DB
 // --------------------
@@ -49,6 +58,7 @@ interface Card {
 const db = new Dexie('Collection') as Dexie & {
   collection: EntityTable<Card, 'code'>;
   toUpload: EntityTable<Card, 'code'>;
+  wishlist: EntityTable<WishlistItem, 'nameseries'>;
 };
 
 // NOTE: you mentioned needing to bump version when adding tokens.
@@ -61,6 +71,12 @@ db.version(1).stores({
 db.version(2).stores({
   collection: '&code, number, edition, series, grabber, obtainedTimestamp, charaTokens*, seriesTokens*,quality,frame,dye_name,worker_effort,worker_toughness,  worker_quickness,  worker_purity,  worker_dropper,  worker_grabber',
   toUpload: '&code, number, edition, series, grabber, obtainedTimestamp, charaTokens*, seriesTokens*,quality,frame,dye_name,worker_effort,worker_toughness,worker_quickness,  worker_purity,  worker_dropper,  worker_grabber',
+});
+
+db.version(3).stores({
+  collection: '&code, number, edition, series, grabber, obtainedTimestamp, charaTokens*, seriesTokens*,quality,frame,dye_name,worker_effort,worker_toughness,  worker_quickness,  worker_purity,  worker_dropper,  worker_grabber, regMaxEffort,mysticMaxEffort',
+  toUpload: '&code, number, edition, series, grabber, obtainedTimestamp, charaTokens*, seriesTokens*,quality,frame,dye_name,worker_effort,worker_toughness,worker_quickness,  worker_purity,  worker_dropper,  worker_grabber',
+  wishlist: '&nameseries, name, series, e1,e2,e3,e4,e5,e6,e7,hunting',
 });
 
 

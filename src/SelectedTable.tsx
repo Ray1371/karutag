@@ -1,17 +1,14 @@
 import type { Card } from "./Upload";
-// import { useState } from "react";
-// import Dexie from "dexie";
-import { useState, 
-   type ChangeEvent } from "react";
+import { useState } from "react";
 import {db} from './Upload';
-// import { TaggingBarPortal } from "./TagPortal";
 import './index.css'
 import calcMaxEffort from "./maxEffort";
+import { WishlistStarButton } from './Wishlist';
 
 import { useContext } from "react";
 import { optionsContext, TagListContext } from "./App";
 import { IoIosSearch } from "react-icons/io"; 
-
+import Select from 'react-select';
 
 type SelectedTableProps = {
   cards: Card[];
@@ -226,27 +223,10 @@ export default function SelectedTable({
     return <div>No cards selected.</div>;
   }
 
-//get list of tags for newtag to use
-//   const [tagList, setTagList] = useState<string[]>([]);
-//   useEffect(() => {
-//   const uniqueTags = Array.from(
-//     new Set(
-//       cards
-//         .map((card) => card.tag)
-//         .filter((tag): tag is string => typeof tag === "string" && tag.trim() !== "")
-//     )
-//   );
-
-//   setTagList(uniqueTags);
-// }, []);
-  
 
   //state to hold tag message components. Would like these to persist across user sessions until cleared or user re-uploads collection.
 const [tagMessages, setTagMessages] = useState<TagPrompt[]>([]);
 const [tagName, setTagName] = useState('');
-const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-  setTagName(event.target.value);
-};
 
   const [saleMessages, setSaleMessages] = useState<SalePrompt[]>([]);
   const [newTagsByCode, setNewTagsByCode] = useState<Record<string, string>>({});
@@ -345,6 +325,14 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
   } = useContext(optionsContext);
 
   const tagList = useContext(TagListContext);
+
+  const handleRowSearch = (url: string, button: HTMLButtonElement) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    const currentCell = button.closest('td');
+    const nextCell = currentCell?.nextElementSibling as HTMLElement | null;
+    const nextInput = nextCell?.querySelector<HTMLInputElement>('input');
+    nextInput?.focus();
+  };
 
   const newTagPromptGenerator = () => {
     // Implementation for generating new tag prompts
@@ -471,21 +459,27 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 
           <th>
             <p>Tag All Below As:</p>
-            <input 
-             className="wider-input"
-             type="text"
-             placeholder="Enter tag name" 
-             list="tagList"
-             tabIndex={0}
-             value={tagName} onChange={handleChange}
+
+            <Select
+              className="select-tag-dropdown"
+              classNamePrefix="react-select"
+              isClearable={true}
+              placeholder="Select/Type tag?"
+              isSearchable={true}
+              options={tagList.map(tag => ({ value: tag, label: tag }))}
+              value={tagName ? { value: tagName, label: tagName } : null}
+              onChange={(selectedOption) => setTagName(selectedOption?.value ?? '')}
             />
 
             <button tabIndex={-1} onClick={() => generatePrompts(tagName, isSingleton)}>Tag All </button>
             <button tabIndex={-1} onClick={() => generateSellMessages()}>Generate Sale Messages</button>
             <button tabIndex={-1} onClick={() => newTagPromptGenerator()}>Set New Tags</button>
+
+
           </th>
-          <th className='col-newtag'>New Tag? </th>
           <th scope="col" className="col-search"></th>
+          <th className='col-newtag'>New Tag? </th>
+
           
         </tr>
       </thead>
@@ -502,6 +496,11 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
                 checked={selected.has(card.code)}
                 onChange={() => onToggleOne(card.code)}
                 className="col-check"
+              />
+              <WishlistStarButton
+                name={card.character}
+                series={card.series}
+                edition={card.edition}
               />
             </td>
 
@@ -530,8 +529,13 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
               })()}</td>}
             {!hideFrame && <td className='col-frame'>{card.frame}</td>}
             {!hideDye && <td className='col-dye'>{card.dye_name}</td>}
+            <td className="col-search">
+              <button tabIndex={-1} onClick={(event) => handleRowSearch(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`, event.currentTarget)}>
+                <IoIosSearch />
+              </button>
+            </td>
               <td className='col-newtag'>
-                  <input 
+                  {/* <input 
                   name={`newTag-${card.code}`} 
                   id={`newTag-${card.code}`}
                   type='text' 
@@ -545,19 +549,25 @@ const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
                       ...prev,
                       [card.code]: e.target.value,
                     }));
-                }}
+                  }}
+                  /> */}
+                  <Select
+                    className="select-tag-dropdown"
+                    classNamePrefix="react-select"
+                    isClearable={true}
+                    placeholder="Select/Type Tag?"
+                    isSearchable={true}
+                    options={tagList.map(tag => ({ value: tag, label: tag }))} //cpt
+                    onChange={(selectedOption) => {
+                      setNewTagsByCode((prev) => ({
+                        ...prev,
+                        [card.code]: selectedOption?.value ?? '',
+                      }));
+                    }}
 
                   />
             </td>
-                          <td className="col-search">
-              <button tabIndex={-1} onClick={() => 
-                {
-                  open(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`)
-                }
-              }>
-                <IoIosSearch />
-              </button>
-            </td>
+
           </tr>
         ))}
       </tbody>

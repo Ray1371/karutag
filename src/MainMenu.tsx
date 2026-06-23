@@ -8,13 +8,13 @@ import Navbar from "./Navbar";
 
 import CollectionTable from "./CollectionTable";
 import SelectedTable from "./SelectedTable";
+import Wishlist from './Wishlist';
 
 import './App.css';
 import { useEffect, useState, useMemo } from 'react';
 
 import { useLiveQuery } from 'dexie-react-hooks';
 
-// import handleUpload, { db } from './Upload';
 import {db} from './Upload';
 import type { Card } from './Upload';
 import calcMaxEffort from './maxEffort';
@@ -48,6 +48,10 @@ export default function MainMenu() {
   // Search-related state
   const [searchFilter, setSearchFilter] = useState('');
   const [filteredCards, setFilteredCards] = useState<Card[]>([]);
+
+  const handleSearchButtonClick = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
   
   //Select-related state
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -65,6 +69,9 @@ export default function MainMenu() {
   //WL limit state
   const [wlLimit, setWlLimit] = useState(100);
 
+  // Wishlist view toggle
+  const [showWishlist, setShowWishlist] = useState(false);
+
   // Full collection (live)
   const fullCollection = useLiveQuery(
     () => db.collection.toArray(),
@@ -81,7 +88,7 @@ export default function MainMenu() {
           .map((card) => card.tag)
           .filter((tag): tag is string => typeof tag === 'string' && tag.trim() !== '')
       )
-    );
+    ).sort();
 
     setTagList(uniqueTags);
   }, [fullCollection]);
@@ -89,7 +96,19 @@ export default function MainMenu() {
   const selectedCards =
   (fullCollection ?? []).filter((c) => selected.has(c.code));
 
+  const suggestedNames = useMemo(
+    () =>
+      Array.from(
+        new Set((fullCollection ?? []).map((card) => card.character))
+      ).sort(),
+    [fullCollection]
+  );
 
+  const suggestedSeries = useMemo(
+    () =>
+      Array.from(new Set((fullCollection ?? []).map((card) => card.series))).sort(),
+    [fullCollection]
+  );
 
   function compareUnknown(a: unknown, b: unknown): number {
     if (typeof a === 'number' && typeof b === 'number') return a - b;
@@ -306,106 +325,106 @@ function toggleSort(nextKey: SortKey) {
       <Navbar />
       <h1>Karuta Collection</h1>
 
-      {/* Upload */}
-      {/* todo: remove margin from first-row elements */}
-      <span className='first-row'>
-        {/* <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-        /> */}
-
-
-
-        {/* Auto-Add Bulk Button and input*/}
-        <input
-          className="wider-input bulk-input"
-          type="number"
-          placeholder="WL Limit"
-          value={wlLimit}
-          onChange={(e) => setWlLimit(Number(e.target.value))}
-        />
-        <button 
-          disabled={bulkRecentlyClicked}
-          onClick={()=>{
-            addBulk();
-            setBulkRecentlyClicked(true);
-            setTimeout(() => setBulkRecentlyClicked(false), 5000);
-          }}
-          // todo? Keep button size consistent between the states
-        aria-label={autoAddBulkAriaLabel}>
-          {bulkRecentlyClicked ? 'Added Bulk' 
-          :
-           'Auto-Add Bulk'}
-        </button>
-        {/* Bulk tooltip button */}
-        {/* Plan: make tooltip appear on mouseover(or click for mobile) */}
+      <div className="view-toggle-row">
         <button
-          className="bulk-tooltip-button"
-          aria-label={autoAddBulkAriaLabel}
-          data-tooltip="Press to select all cards within:
-          w<=[WL Limit](default 100) p>=1001 t:none
-          ."
+          type="button"
+          className={!showWishlist ? 'active' : ''}
+          onClick={() => setShowWishlist(false)}
         >
-          ?
+          Collection
         </button>
-
-        {/* singleton toggle button */}
-        <button 
-          className="singleton"
-          onClick={() => setIsSingleton(!isSingleton)}
-        >
-          {isSingleton ? 'Singleton Mode: ON' : 'Singleton Mode: OFF'}
-        </button>
-
         <button
-          className="singleton-tooltip-button"
-          data-tooltip="If enabled, each card gets its own tagging message"
-          >?</button>
-      </span>
-
-              {/* Search */}
-        <input
-        className="wider-input"
-          type="text"
-          placeholder="Search cards..."
-          value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
-        />
-      {/* Table */}
-      <CollectionTable
-        cards={sortedFilteredCards}
-        selected={selected}
-        onToggleOne={toggleOne}
-        allSelected={allSelected}
-        onToggleSelectAll={toggleSelectAll}
-        sortKey={sortKey}
-        sortDir={sortDir}
-        onToggleSort={toggleSort}
-      />
-
-
-{/* todo: left align the collection div */}
-      <div>
-        Total Cards in Collection: {fullCollection?.length ?? 0}
+          type="button"
+          className={showWishlist ? 'active' : ''}
+          onClick={() => setShowWishlist(true)}
+        >
+          Wishlist
+        </button>
       </div>
 
-{/* Table for Selected Cards */}
-    <h2>Selected Cards ({selectedCards.length})</h2>
-    <TagListContext.Provider value={tagList}>
-      <SelectedTable
-        // cards={selectedCards}
-          cards={sortedSelectedCards}
-        selected={selected}
-        onToggleOne={toggleOne}
-          isSingleton={isSingleton}
-          sortKey={sortKey}
-          sortDir={sortDir}
-          onToggleSort={toggleSort}
-      />
-    </TagListContext.Provider>
+      {showWishlist ? (
+        <Wishlist suggestedNames={suggestedNames} suggestedSeries={suggestedSeries} />
+      ) : (
+        <>
+          <span className='first-row'>
+            <input
+              className="wider-input bulk-input"
+              type="number"
+              placeholder="WL Limit"
+              value={wlLimit}
+              onChange={(e) => setWlLimit(Number(e.target.value))}
+            />
+            <button 
+              disabled={bulkRecentlyClicked}
+              onClick={()=>{
+                addBulk();
+                setBulkRecentlyClicked(true);
+                setTimeout(() => setBulkRecentlyClicked(false), 5000);
+              }}
+              aria-label={autoAddBulkAriaLabel}
+            >
+              {bulkRecentlyClicked ? 'Added Bulk' : 'Auto-Add Bulk'}
+            </button>
+            <button
+              className="bulk-tooltip-button"
+              aria-label={autoAddBulkAriaLabel}
+              data-tooltip="Press to select all cards within: w<=[WL Limit](default 100) p>=1001 t:none"
+            >
+              ?
+            </button>
+            <button 
+              className="singleton"
+              onClick={() => setIsSingleton(!isSingleton)}
+            >
+              {isSingleton ? 'Singleton Mode: ON' : 'Singleton Mode: OFF'}
+            </button>
+            <button
+              className="singleton-tooltip-button"
+              data-tooltip="If enabled, each card gets its own tagging message"
+            >
+              ?
+            </button>
+          </span>
 
-      {/* Upload progress */}
+          <input
+            className="wider-input"
+            type="text"
+            placeholder="Search cards..."
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+          />
+
+          <CollectionTable
+            cards={sortedFilteredCards}
+            selected={selected}
+            onToggleOne={toggleOne}
+            allSelected={allSelected}
+            onToggleSelectAll={toggleSelectAll}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onToggleSort={toggleSort}
+            onSearchButtonClick={handleSearchButtonClick}
+          />
+
+          <div>
+            Total Cards in Collection: {fullCollection?.length ?? 0}
+          </div>
+
+          <h2>Selected Cards ({selectedCards.length})</h2>
+          <TagListContext.Provider value={tagList}>
+            <SelectedTable
+              cards={sortedSelectedCards}
+              selected={selected}
+              onToggleOne={toggleOne}
+              isSingleton={isSingleton}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onToggleSort={toggleSort}
+            />
+          </TagListContext.Provider>
+        </>
+      )}
+
       {isUploading && (
         <div>
           Uploaded {cardsUpdated} / {rowCount}
