@@ -386,6 +386,7 @@ const [tagName, setTagName] = useState('');
     >
       <thead>
         <tr>
+                  <th scope="col" className="col-search"></th>
 
           <th scope="col"
             className="col-check"
@@ -481,7 +482,7 @@ const [tagName, setTagName] = useState('');
 
 
           </th>
-          <th scope="col" className="col-search"></th>
+
           <th className='col-newtag'>New Tag? </th>
 
           
@@ -491,7 +492,11 @@ const [tagName, setTagName] = useState('');
       <tbody>
         {cards.map((card) => (
           <tr key={card.code}>
-
+            <td className="col-search">
+              <button tabIndex={-1} onClick={(event) => handleRowSearch(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`, event.currentTarget)}>
+                <IoIosSearch />
+              </button>
+            </td>
             <td
               className="col-check"
             >
@@ -533,11 +538,7 @@ const [tagName, setTagName] = useState('');
               })()}</td>}
             {!hideFrame && <td className='col-frame'>{card.frame}</td>}
             {!hideDye && <td className='col-dye'>{card.dye_name}</td>}
-            <td className="col-search">
-              <button tabIndex={-1} onClick={(event) => handleRowSearch(`https://www.google.com/search?tbm=isch&q=${generateSearchString(card)}`, event.currentTarget)}>
-                <IoIosSearch />
-              </button>
-            </td>
+
               <td className='col-newtag'>
                   {/* <input 
                   name={`newTag-${card.code}`} 
