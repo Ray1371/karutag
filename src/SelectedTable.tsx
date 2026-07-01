@@ -9,6 +9,7 @@ import { useContext } from "react";
 import { optionsContext, TagListContext } from "./App";
 import { IoIosSearch } from "react-icons/io"; 
 import Select from 'react-select';
+// import { TbPrompt } from "react-icons/tb";
 
 type SelectedTableProps = {
   cards: Card[];
@@ -55,13 +56,7 @@ type TagPrompt = {
 
 type SalePrompt = {
   id: string;
-  codes: string[];
-  wishlists: (number | null)[]; // allow null if wishlist missing
-  name: string[];
-  series: string[];
-  print: number[];
-  edition: number[];
-  messages: string[];
+  message: string;
 };
 
 const TagMessage = (props: { 
@@ -159,28 +154,18 @@ const SaleMessage = (
     setTimeout(() => setClicked(false), 5000);
   };
 
-  // Build a human-readable message for this prompt. Each entry corresponds
-  // to one card; join with newlines for clipboard copy.
-  const lines = props.messages.length
-    ? props.messages
-    : props.codes.map((code, i) => {
-        const wl = props.wishlists?.[i] ?? '';
-        const name = props.name?.[i] ?? '';
-        const series = props.series?.[i] ?? '';
-        const print = props.print?.[i] ?? '';
-        const edition = props.edition?.[i] ?? '';
-        
-        return `${code} ❤️${wl} ${name} - ${series} - #${print} ◈${edition}`.trim();
-      });
+  const lines = props.message
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   const payload = lines.join('\n');
-  const excelLines = props.codes.map((code, i) => {
-    const wl = props.wishlists?.[i] ?? '';
-    const name = props.name?.[i] ?? '';
-    const series = props.series?.[i] ?? '';
-    const print = props.print?.[i] ?? '';
-    const edition = props.edition?.[i] ?? '';
-    return [code, wl, name, series, print, edition].join('\t');
+  const excelLines = lines.map((line) => {
+    const match = line.match(/^(.+?) ❤️(.+?) (.+?) - (.+?) - #(.+?) ◈(.+)$/);
+    if (!match) return line;
+
+    const [, code, wishlists, name, series, print, edition] = match;
+    return [code, wishlists, name, series, print, edition].join('\t');
   });
   const excelPayload = excelLines.join('\n');
 
@@ -291,25 +276,44 @@ const [tagName, setTagName] = useState('');
   };
 
   const generateSellMessages = () => {
-    // Build a SalePrompt for each selected card using the in-memory `cards`.
     const prompts: SalePrompt[] = [];
+    const maxChars = 2000;
+    const currentBatch: string[] = [];
+    let currentBatchLength = 0;
+
+    const flushBatch = () => {
+      if (currentBatch.length === 0) return;
+
+      prompts.push({
+        id: crypto.randomUUID(),
+        message: currentBatch.join('\n'),
+      });
+
+      currentBatch.length = 0;
+      currentBatchLength = 0;
+    };
+
     selected.forEach((code) => {
       const card = cards.find((c) => c.code === code);
       if (!card) return;
-      const msg = `${card.code} ❤️${card.wishlists} ${card.character} - ${card.series} - #${card.number} ◈${card.edition}`;
-      prompts.push({
-        id: crypto.randomUUID(),
-        codes: [card.code],
-        wishlists: [card.wishlists],
-        name: [card.character],
-        series: [card.series],
-        print: [card.number],
-        edition: [card.edition],
-        messages: [msg],
-      });
+
+      const line = `${card.code} ❤️${card.wishlists} ${card.character} - ${card.series} - #${card.number} ◈${card.edition}`;
+      const nextBatchLength = currentBatchLength + (currentBatchLength === 0 ? 0 : 1) + line.length;
+
+      if (currentBatchLength > 0 && nextBatchLength > maxChars) {
+        flushBatch();
+      }
+
+      currentBatch.push(line);
+      currentBatchLength = currentBatch.length === 1 ? line.length : nextBatchLength;
     });
-    if (prompts.length > 0) setSaleMessages((prev) => [...prev, ...prompts]);
-  }
+
+    flushBatch();
+
+    if (prompts.length > 0) {
+      setSaleMessages((prev) => [...prev, ...prompts]);
+    }
+  };
   const {
       condensedTable,
       hideToughness,
@@ -600,13 +604,7 @@ const [tagName, setTagName] = useState('');
           <SaleMessage
             key={p.id}
             id={p.id}
-            codes={p.codes}
-            wishlists={p.wishlists}
-            name={p.name}
-            series={p.series}
-            print={p.print}
-            edition={p.edition}
-            messages={p.messages}
+            message={p.message}
             onDiscard={() => setSaleMessages((prev) => prev.filter((x) => x.id !== p.id))}
           />
         ))}
