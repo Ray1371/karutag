@@ -395,11 +395,23 @@ button.navbar{
   margin-top: 2rem;
 }
 
+.first-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .first-row button{
   /* margin:0 1rem; */
   /* display:inline-block; */
   border: solid #000 1px;
 }
+
+.export-collection-button {
+  margin-left: 0.25rem;
+  margin-top: 0.1rem;
+}
+
 .first-row input::placeholder{
   font-size: small;
 
@@ -409,6 +421,7 @@ button.navbar{
   height: 2rem;
   width: min(240px, 100%);
   font-size: 0.95rem;
+  padding-left: 0.6rem;
 }
 
 .bulk-input{
@@ -550,4 +563,11 @@ td.col-frame{
 th.col-dye,
 td.col-dye{
   width: 150px;
+}
+
+.search-input{
+  /* height: 2rem; */
+  /* width: min(240px, 100%); */
+  /* font-size: 0.95rem; */
+  margin-left: 30px;
 }

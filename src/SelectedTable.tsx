@@ -64,6 +64,7 @@ const TagMessage = (props: {
     tag: string;
     codes: string[];
     onDiscard: () => void;
+    onApplied?: (codes: string[]) => void;
     isSingleton?:boolean;    
   }) => {
   const[clicked, setClicked] = useState(false);
@@ -80,19 +81,16 @@ const TagMessage = (props: {
   }
   //idk if need async yet,cpt suggested 
   const applyChange = async() => {
-    //split message into array of codes
-    const codes = props.message.split(' ');
+    const codes = props.codes;
 
-
-console.log("Matched rows:");
     await db.transaction('rw', db.collection, async() => {
       await db.collection
         .where('code')
         .anyOf(codes)
         .modify({ tag: props.tag });
     });
-    //todo: Verify that changes applied, ensure UI picks this up too.
-    
+
+    props.onApplied?.(codes);
   }
 
 
@@ -127,7 +125,7 @@ console.log("Matched rows:");
         <button 
         tabIndex={-1}
         onClick={() => {
-          applyChange();
+          void applyChange();
           setApplied(true);
           setTimeout(() => {
             setApplied(false);
@@ -330,6 +328,12 @@ const [tagName, setTagName] = useState('');
 
   const tagList = useContext(TagListContext);
 
+  const clearSelection = () => {
+    Array.from(selected).forEach((code) => {
+      onToggleOne(code);
+    });
+  };
+
   const handleRowSearch = (url: string, button: HTMLButtonElement) => {
     window.open(url, '_blank', 'noopener,noreferrer');
     const currentCell = button.closest('td');
@@ -479,6 +483,7 @@ const [tagName, setTagName] = useState('');
             <button tabIndex={-1} onClick={() => generatePrompts(tagName, isSingleton)}>Tag All </button>
             <button tabIndex={-1} onClick={() => generateSellMessages()}>Generate Sale Messages</button>
             <button tabIndex={-1} onClick={() => newTagPromptGenerator()}>Set New Tags</button>
+            <button tabIndex={-1} onClick={clearSelection} disabled={selected.size === 0}>Clear Selection</button>
 
 
           </th>
@@ -592,6 +597,13 @@ const [tagName, setTagName] = useState('');
             message={p.message}
             tag={p.tag}
             codes={p.codes}
+            onApplied={(codes) => {
+              codes.forEach((code) => {
+                if (selected.has(code)) {
+                  onToggleOne(code);
+                }
+              });
+            }}
             onDiscard={() =>
               setTagMessages((prev) => prev.filter((x) => x.id !== p.id))
             }

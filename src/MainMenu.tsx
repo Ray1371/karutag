@@ -25,6 +25,8 @@ import { searchCards,
          NUMERIC_KEYS,
  } from './regexStuff';
 
+import Papa from 'papaparse';
+
 // -----------------------------
 
 export default function MainMenu() {
@@ -316,6 +318,27 @@ function toggleSort(nextKey: SortKey) {
   with 100 (by default) or fewer wishlists 
   and print number above 1000 to the selection.`;
 
+// Export the collection to a CSV file
+const exportCollection = () => {
+  const cards: Card[] = (fullCollection ?? []) as Card[];
+
+  if (cards.length === 0) {
+    return;
+  }
+
+  const csv = Papa.unparse(cards);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.setAttribute('download', `collection-${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 
   // -----------------------------
   // Render
@@ -384,10 +407,15 @@ function toggleSort(nextKey: SortKey) {
             >
               ?
             </button>
+            <button
+              onClick={exportCollection}
+            >
+              Export Collection
+            </button>
           </span>
 
           <input
-            className="wider-input"
+            className="wider-input search-input"
             type="text"
             placeholder="Search cards..."
             value={searchFilter}
